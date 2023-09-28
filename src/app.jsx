@@ -1,40 +1,39 @@
 import * as React from 'react';
 import {createRoot} from 'react-dom/client';
-
-async function addSticky() {
-  const stickyNote = await miro.board.createStickyNote({
-    content: 'Hello, World!',
-  });
-
-  await miro.board.viewport.zoomTo(stickyNote);
-}
+import {useState} from "react"
 
 const App = () => {
+  const [clickedCard, setClickedCard] = useState()
   React.useEffect(() => {
-    addSticky();
+    const listenForClickOnAppCard = async () => {
+      const idGetParam = new URLSearchParams(window.location.search).get('id')
+      const cardInfo = await miro.board.getById(idGetParam);
+      
+      setClickedCard(cardInfo)
+    }
+    
+    const createAppCard = async () => {
+      await miro.board.createAppCard({
+        title: 'This is the title of the app card',
+        description:
+          'The custom preview fields are highlighted in different colors; the app card icon is displayed on the bottom-right.',
+        status: 'connected', // Default status of new app cards: 'disconnected'
+      });
+    }
+    
+    createAppCard()
+    listenForClickOnAppCard()
+    
   }, []);
 
   return (
     <div className="grid wrapper">
       <div className="cs1 ce12">
-        <img src="/src/assets/congratulations.png" alt="" />
-      </div>
-      <div className="cs1 ce12">
-        <h1>Congratulations!</h1>
-        <p>You've just created your first Miro app!</p>
-        <p>
-          To explore more and build your own app, see the Miro Developer
-          Platform documentation.
-        </p>
-      </div>
-      <div className="cs1 ce12">
-        <a
-          className="button button-primary"
-          target="_blank"
-          href="https://developers.miro.com"
-        >
-          Read the documentation
-        </a>
+        <p>This demo app shows how to show the description for app cards</p>
+      
+      {clickedCard &&
+        <p>There is a app card clicked with the following description:<br/> <em>{clickedCard.description}</em></p>
+      }
       </div>
     </div>
   );
